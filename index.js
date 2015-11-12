@@ -28,8 +28,6 @@ var inlineScriptFinder = pred.AND(
   )
 );
 
-var noSemiColonInsertion = /\/\/|;\s*$|\*\/\s*$/;
-
 module.exports = function crisp(options) {
   var source = options.source || '';
   var jsFileName = options.jsFileName || '';
@@ -43,7 +41,7 @@ module.exports = function crisp(options) {
   var scripts = dom5.queryAll(doc, inlineScriptFinder);
 
   var contents = [];
-  scripts.forEach(function(sn) {
+  scripts.forEach(function (sn) {
     var nidx = sn.parentNode.childNodes.indexOf(sn) + 1;
     var next = sn.parentNode.childNodes[nidx];
     dom5.remove(sn);
@@ -52,12 +50,9 @@ module.exports = function crisp(options) {
       dom5.remove(next);
     }
     var content = dom5.getTextContent(sn).trim();
-    var lines = content.split('\n');
-    var lastline = lines[lines.length - 1];
-    if (!noSemiColonInsertion.test(lastline)) {
-      content += ';';
-    }
-    contents.push(content);
+    // wrap content in immediately invoked function expression (IIFE)
+    let iifeContent = '(function(){\n' + content + '\n})();'
+    contents.push(iifeContent);
   });
 
   if (!onlySplit) {
@@ -75,7 +70,6 @@ module.exports = function crisp(options) {
   }
 
   var html = dom5.serialize(doc);
-  // newline + semicolon should be enough to capture all cases of concat
   var js = contents.join('\n');
 
   return {
