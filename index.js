@@ -51,7 +51,7 @@ module.exports = function crisp(options) {
     }
     var content = dom5.getTextContent(sn).trim();
     // wrap content in immediately invoked function expression (IIFE)
-    let iifeContent = '(function(){\n' + content + '\n})();'
+    var iifeContent = '(function(){\n' + content + '\n})();';
     contents.push(iifeContent);
   });
 
